@@ -5,7 +5,7 @@ from subprocess import PIPE, Popen
 import time
 
 pyrun_script_dir = sys.argv[0].split('qrsh_regression')[0]
-cmd = 'python {}pyrun_py2_test.py {} {} {} {}'.format(pyrun_script_dir, sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+cmd = 'python {}regression_core.py {} {} {} {}'.format(pyrun_script_dir, sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
 
 # p2 = Popen(['mpstat'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
