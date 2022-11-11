@@ -178,8 +178,8 @@ def check_qrsh_on_grid():
     now_grid_list = []
     now_job_id_list = []
     not_on_grid_list = []
-    for a in range(6):
-        time.sleep(20)
+    for a in range(12):     # check 2 minute
+        time.sleep(10)
         merge_sub_regression_report()
         print('------------------------------')
         p2 = Popen(['cat', 'regression_report'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
@@ -194,9 +194,11 @@ def check_qrsh_on_grid():
                 now_job_id_list.append(item.split(' ')[1])
         for i in range(len(divide_pattern_cmd)):
             if grid_name_list[i] not in now_grid_list:
-                print('{} not on grid'.format(grid_name_list[i]))
+                print(grid_name_list[i] + ', ', end='')
                 not_on_grid_list.append(grid_name_list[i])
                 all_on_grid = False
+        if not all_on_grid:
+            print('not on grid')
 
         if all_on_grid:
             print('all qrsh on grid')
@@ -268,7 +270,7 @@ if __name__ == '__main__':
             c = raw_input()
             if c == 'y' or c == 'Y':
                 print('rm -rf regression_' + cfg_file.split('.')[0] + '/    please wait...')
-                r = os.system('rm -rf regression_' + cfg_file.split('.')[0])
+                r = os.system('rm -rf regression_' + cfg_file.split('.')[0] + '/*')
                 if r != 0:
                     exit()
                 os_cmd = 'mkdir regression_' + cfg_file.split('.')[0]
@@ -416,7 +418,6 @@ if __name__ == '__main__':
                 os.system(qdel_list + ' 1> /dev/null 2>&1')
 
                 while(1):
-
                     grid_jb_ID_list, not_on_grid_job_ID_list = find_grid_jb_ID_list()
                     if len(not_on_grid_job_ID_list) == 0:
                         print('qdel finished')
@@ -508,6 +509,7 @@ if __name__ == '__main__':
 
         print('all threads terminated')
     else:
+        time.sleep(3)   # wait file IO
         gen_running_pattern(all_pattern_name_list=all_pattern_name_list)
         # merge_sub_regression_report()   # gen_running_pattern() will merge_sub_regression_report
         with open('regression_report', 'r') as f:
@@ -515,10 +517,12 @@ if __name__ == '__main__':
 
         find_sim_failed_and_nofsdb = False
         all_pattern_pass = True
+        pattern_start = False
         sim_failed_pattern_name_and_seed = ''
         sim_failed_pattern_name = ''
         for item in regression_report_lines:
-            if item.find('PASSED') == -1:
+            if item.find('PASSED') == -1 and pattern_start:
+                # print(item)
                 all_pattern_pass = False
                 if item.find('SIM_FAILED') != -1:
                     sim_failed_pattern_name_and_seed = item.split()[0]
@@ -537,6 +541,8 @@ if __name__ == '__main__':
                             break
                     if find_sim_failed_and_nofsdb:
                         break
+            if item.startswith('='):
+                pattern_start = True
 
 
         for item in sub_cfg_name_list:
