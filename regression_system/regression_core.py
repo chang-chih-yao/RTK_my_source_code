@@ -422,7 +422,7 @@ class pyrun_regression:
                 pattern_result = 0
             elif 'Testcase Status: FAILED' in dpic_log or 'UVM_FATAL' in dpic_log or '*F' in dpic_log :
                 pattern_result = 1
-            elif 'ncvlog: *E' in dpic_log :
+            elif ': *E' in dpic_log or ': *F' in dpic_log:
                 pattern_result = 2
             else:
                 pattern_result = 3
@@ -572,8 +572,6 @@ def signal_handler(signal, frame):
 
 def update_regression_report(process_share_list, process_share_dict):
     while(1):
-        if exit_flag:
-            break
         now_time = int(time.time())
         for i in range(len(process_share_list)):
             if len(process_share_list[i].split()) == 3:
@@ -588,6 +586,8 @@ def update_regression_report(process_share_list, process_share_dict):
         with open('{}regression_report_{}'.format(TMPFILE_DIR, cpu_name), 'w')as f:
             for item in process_share_list:
                 f.write(item + '\n')
+        if exit_flag:
+            break
         time.sleep(5)
 
 if __name__=='__main__':
